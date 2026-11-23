@@ -153,7 +153,10 @@ public class MapUpdatePreparationTask implements MapRenderTask {
         // (they might have been rendered before but deleted now)
         if (map.getMapSettings().isCheckForRemovedRegions()) {
             try {
-                map.getMapRegionState().forEach((x, z, _) -> regions.add(new Vector2i(x, z)));
+                map.getMapRegionState().forEach((x, z, _) -> {
+                    Vector2i region = new Vector2i(x, z);
+                    if (regionRadiusFilter.test(region)) regions.add(region);
+                });
             } catch (IOException ex) {
                 Logger.global.logError("Failed to iterate over map region-state", ex);
             }
