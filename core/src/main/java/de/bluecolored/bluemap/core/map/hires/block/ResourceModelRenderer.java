@@ -433,6 +433,22 @@ public class ResourceModelRenderer implements BlockRenderer {
             z = -1;
         }
 
+        // A face inside the block (the top of a slab, dirt path, carpet or snow layer) isn't on the block's edge in the
+        // direction it faces, so the checks below, which look at the level in front of the block, never count anything.
+        // Like vanilla, such a face is shaded by the neighbors on the block's own level instead (a wall next to a slab).
+        if (x * dirVec.getX() + y * dirVec.getY() + z * dirVec.getZ() <= 0){
+            int sx = dirVec.getX() == 0 ? x : 0;
+            int sy = dirVec.getY() == 0 ? y : 0;
+            int sz = dirVec.getZ() == 0 ? z : 0;
+
+            if (sx != 0 && getRotationRelativeBlock(sx, 0, 0).getProperties().isOccluding()) occluding++;
+            if (sy != 0 && getRotationRelativeBlock(0, sy, 0).getProperties().isOccluding()) occluding++;
+            if (sz != 0 && getRotationRelativeBlock(0, 0, sz).getProperties().isOccluding()) occluding++;
+            if (Math.abs(sx) + Math.abs(sy) + Math.abs(sz) == 2 &&
+                    getRotationRelativeBlock(sx, sy, sz).getProperties().isOccluding()) occluding++;
+
+            return Math.max(0f, Math.min(1f - occluding * 0.25f, 1f));
+        }
 
         if (x * dirVec.getX() + y * dirVec.getY() > 0){
             if (getRotationRelativeBlock(x, y, 0).getProperties().isOccluding()) occluding++;
